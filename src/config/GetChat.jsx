@@ -12,19 +12,21 @@ const GetChats = () => {
   useEffect(() => {
     const getFetchChats = () => {
       const unsub = onSnapshot(doc(db, "userChats", currentUser.uid), (doc) => {
-        const chatMessage = Object.entries(doc.data())[0];
+        const chatMessage = Object.entries(doc.data())[0] || null;
 
-        dispatch({
-          type: "SET_DEFAULT_USER",
-          payload: {      
-            chatId: chatMessage[0],
-            user: {
-              displayName: chatMessage[1].userInfo.displayName,
-              photoURL: chatMessage[1].userInfo.photoURL,
-              uid: chatMessage[1].userInfo.uid,
+        if (chatMessage) {
+          dispatch({
+            type: "SET_DEFAULT_USER",
+            payload: {      
+              chatId: chatMessage[0],
+              user: {
+                displayName: chatMessage[1].userInfo.displayName,
+                photoURL: chatMessage[1].userInfo.photoURL,
+                uid: chatMessage[1].userInfo.uid,
+              },
             },
-          },
-        });
+          });
+        }
       });
 
       return () => { unsub() };

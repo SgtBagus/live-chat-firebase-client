@@ -4,21 +4,18 @@ import {
   doc, updateDoc, serverTimestamp, getDoc,
 } from "firebase/firestore";
 
-import { AuthContext } from "../context/AuthContext";
 import { db } from "../firebase";
 
 import Chat from '../components/Chat'
-import GetChats from '../config/GetChat';
+
+import GetChats from "../config/GetChat";
 
 class Home extends Component {
-  static contextType = AuthContext;
-
   constructor(props) {
     super(props);
 
     this.state = {
       adminData: null,
-      chatMessage: null,
     };
   }
 
@@ -81,7 +78,7 @@ class Home extends Component {
       },
     } = this.props;
 
-    await setDoc(doc(db, "chats", combinedId), { messages: [] });
+    await setDoc(doc(db, "chats", combinedId), { messages: [], allow_chat: false });
 
     await updateDoc(doc(db, "userChats", currentUid), {
       [combinedId + ".userInfo"]: {
@@ -111,7 +108,7 @@ class Home extends Component {
         {
           adminData && (
             <div className="container">
-              <Chat/>
+              <Chat />
             </div>
           )
         }

@@ -16,9 +16,12 @@ const Login = () => {
     try {
       const data = query(collection(db, "users"), where("email", "==", email));
       const userData = await getDocs(data);
+      
+      const findData = userData.docs.map(doc => doc.data())[0];
 
-      const { is_admin: isAdmin, email: loginEmail } = userData.docs.map(doc => doc.data())[0];
+      if (!findData) throw new Error ('Tidak Terdaftar');
 
+      const { is_admin: isAdmin, email: loginEmail } = findData;
       if (!isAdmin) {
         await signInWithEmailAndPassword(auth, loginEmail, password).then(() => {
           navigate("/");

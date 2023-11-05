@@ -1,38 +1,47 @@
-import React, { useContext, useState } from "react";
+import React, { Component } from "react";
 import { v4 as uuid } from "uuid";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import {
   arrayUnion, doc, serverTimestamp, Timestamp, updateDoc,
 } from "firebase/firestore";
 
-import { AuthContext } from "../context/AuthContext";
-import { ChatContext } from "../context/ChatContext";
 
 import { db, storage } from "../firebase";
 
 import Img from "../img/img.png";
 import Attach from "../img/attach.png";
 
-const Input = () => {
-  const [text, setText] = useState("");
-  const [img, setImg] = useState(null);
+class Input extends Component {
+  constructor(props) {
+    super(props);
 
-  const { currentUser } = useContext(AuthContext);
-  const { data } = useContext(ChatContext);
+    this.state = {
+      text: '',
+      img: null,
+    };
+  }
 
-  const handleSend = async () => {
+  changeForm = (key, value) => {
+    this.setState({
+      [key]: value,
+    })
+  }
+
+  handleSend = async () => {
+    const { currentUser, dataChat } = this.props; 
+    const { text, img } = this.state;
+
     if (img) {
       const storageRef = ref(storage, uuid());
-
       const uploadTask = uploadBytesResumable(storageRef, img);
 
       uploadTask.on(
         (error) => {
-          //TODO:Handle Error
+          alert(error);
         },
         () => {
           getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
-            await updateDoc(doc(db, "chats", data.chatId), {
+            await updateDoc(doc(db, "chats", dataChat.chatId), {
               messages: arrayUnion({
                 id: uuid(),
                 text,
@@ -45,7 +54,7 @@ const Input = () => {
         }
       );
     } else {
-      await updateDoc(doc(db, "chats", data.chatId), {
+      await updateDoc(doc(db, "chats", dataChat.chatId), {
         messages: arrayUnion({
           id: uuid(),
           text,
@@ -56,45 +65,60 @@ const Input = () => {
     }
 
     await updateDoc(doc(db, "userChats", currentUser.uid), {
-      [data.chatId + ".lastMessage"]: {
+      [dataChat.chatId + ".lastMessage"]: {
         text,
       },
-      [data.chatId + ".date"]: serverTimestamp(),
+      [dataChat.chatId + ".date"]: serverTimestamp(),
     });
 
-    await updateDoc(doc(db, "userChats", data.user.uid), {
-      [data.chatId + ".lastMessage"]: {
+    await updateDoc(doc(db, "userChats", dataChat.user.uid), {
+      [dataChat.chatId + ".lastMessage"]: {
         text,
       },
-      [data.chatId + ".date"]: serverTimestamp(),
+      [dataChat.chatId + ".date"]: serverTimestamp(),
     });
 
-    setText("");
-    setImg(null);
-  };
-  return (
-    <div className="input">
-      <input
-        type="text"
-        placeholder="Type something..."
-        onChange={(e) => setText(e.target.value)}
-        value={text}
-      />
-      <div className="send">
-        <img src={Attach} alt="" />
-        <input
-          type="file"
-          style={{ display: "none" }}
-          id="file"
-          onChange={(e) => setImg(e.target.files[0])}
-        />
-        <label htmlFor="file">
-          <img src={Img} alt="" />
-        </label>
-        <button onClick={handleSend}>Send</button>
+    this.setState({
+      text: '',
+      img: null,
+    })
+  }
+  
+  render() {
+    const { allowChat } = this.props;
+    const { text, img } = this.state;
+
+    return (
+      <div className="input">
+        {
+          allowChat && (
+            <input
+              type="text"
+              placeholder="Type something..."
+              onChange={(e) => this.changeForm('text', e.target.value)}
+              value={text}
+            />
+          )
+        }
+        {
+          img !== null && (<img src={URL.createObjectURL(img)} alt="" width="150" height="150" />)
+        }
+        <div className="send">
+          <input
+            type="file"
+            style={{ display: "none" }}
+            id="file"
+            onChange={(e) => this.changeForm('img', e.target.files[0])}
+          />
+          <label htmlFor="file">
+            <img src={Attach} alt="" />
+            <img src={Img} alt="" />
+          </label>
+          <button onClick={() => { this.handleSend() }}>Send</button>
+        </div>
       </div>
-    </div>
-  );
-};
+    );
+  }
+}
 
 export default Input;
