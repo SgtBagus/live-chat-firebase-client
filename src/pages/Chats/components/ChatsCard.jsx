@@ -87,6 +87,9 @@ const ChatsCard = ({
         }
     }
 
+    console.log(uuid());
+    console.log(data);
+    console.log(currentUser);
     const { minimize, close } = cardTool
     return (
         <div className="card direct-chat direct-chat-warning">
