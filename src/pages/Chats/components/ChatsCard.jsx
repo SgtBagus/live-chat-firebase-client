@@ -36,32 +36,31 @@ const ChatsCard = ({
     const handleSend = async () => {
         try {
             if (img) {
-            const storageRef = ref(storage, uuid());
-            const uploadTask = uploadBytesResumable(storageRef, img);
-        
-            uploadTask.on(
-                (error) => { alert(error); },
-                () => {
-                getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
-                    await updateDoc(doc(db, "chats", data.chatId), {
-                        messages: arrayUnion({
-                            id: uuid(),
-                            text,
-                            senderId: currentUser.uid,
-                            date: Timestamp.now(),
-                            img: downloadURL,
-                        }),
+                const storageRef = ref(storage, uuid());
+                const uploadTask = uploadBytesResumable(storageRef, img);
+            
+                uploadTask.on(
+                    (error) => { alert(error); },
+                    () => {
+                    getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
+                        await updateDoc(doc(db, "chats", data.chatId), {
+                            messages: arrayUnion({
+                                id: uuid(),
+                                text,
+                                senderId: currentUser.uid,
+                                date: Timestamp.now(),
+                                img: downloadURL,
+                            }),
+                        });
                     });
-                });
-                }
-            );
+                    }
+                );
             } else {
-                console.log(data.chatId);
                 await updateDoc(doc(db, "chats", data.chatId), {
                     messages: arrayUnion({
                         id: uuid(),
                         text,
-                        senderId: data.uid,
+                        senderId: currentUser.uid,
                         date: Timestamp.now(),
                     }),
                 });

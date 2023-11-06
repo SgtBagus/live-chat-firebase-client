@@ -6,7 +6,7 @@ import {
 
 import { db } from "../../firebase";
 
-import Chat from './components/Chat'
+import Messages from './components/Messages'
 import ChatsCard from './components/ChatsCard';
 
 import GetChats from './config/GetChat';
@@ -133,7 +133,7 @@ class ChatPage extends Component {
                 maxHeight: '600px',
               }}>
               <div className="direct-chat-msg">
-                <Chat />
+                <Messages />
               </div>
             </div>
           </ChatsCard>
