@@ -43,15 +43,13 @@ const ChatsCard = ({
         setOnSend(true);
 
         try {
-            if (!text) throw new Error('Text Message tidak boleh kosong')
             if (img) {
                 const storageRef = ref(storage, uuid());
+                console.log(storageRef);
                 const uploadTask = uploadBytesResumable(storageRef, img);
             
-                uploadTask.on(
-                    (error) => { alert(error); },
-                    () => {
-                    getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
+                await uploadTask.on((error) => { alert(error); }, async () => {
+                    await getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
                         await updateDoc(doc(db, "chats", data.chatId), {
                             messages: arrayUnion({
                                 id: uuid(),
@@ -62,8 +60,7 @@ const ChatsCard = ({
                             }),
                         });
                     });
-                    }
-                );
+                });
             } else {
                 await updateDoc(doc(db, "chats", data.chatId), {
                     messages: arrayUnion({
@@ -89,11 +86,11 @@ const ChatsCard = ({
                 [data.chatId + ".date"]: serverTimestamp(),
             });
             
-            await setText(null);
+            await setText('');
             await setImg(null);
-            setOnSend(false);
         } catch (err) {
             alert(err);
+        } finally {
             setOnSend(false);
         }
     }
@@ -137,7 +134,7 @@ const ChatsCard = ({
                 )
             }
             <div className="card-footer">
-                <form action="#" method="post">
+                {/* <form action="#" method="post"> */}
                     <div className='row'>
                         <div className="col-md-8 my-2">
                             {
@@ -211,7 +208,7 @@ const ChatsCard = ({
                             </div>
                         </div>
                     </div>
-                </form>
+                {/* </form> */}
             </div>
         </div>
     )

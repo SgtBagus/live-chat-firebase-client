@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useRef } from "react";
 import { AuthContext } from "../../../context/AuthContext";
 import { ChatContext } from "../../../context/ChatContext";
+import { checkImage } from "../../../Helper/checkImageUrl";
 
 const Message = ({ message }) => {
   const { currentUser } = useContext(AuthContext);
@@ -19,6 +20,8 @@ const Message = ({ message }) => {
     )
   };
 
+  console.log(checkImage(message.img))
+
   return (
     <div
       ref={ref}
@@ -35,7 +38,11 @@ const Message = ({ message }) => {
         <span
           className={`direct-chat-name ${message.senderId === currentUser.uid ? 'float-right' : 'float-left' }`}
         >
-          Alexander Pierce
+          {
+            message.senderId === currentUser.uid
+            ? currentUser.displayName
+            : data.user.displayName
+          }
         </span>
       </div>
       <div>
@@ -47,16 +54,17 @@ const Message = ({ message }) => {
         <div
           className="direct-chat-text"
           style={{
-            width: 'max-content',
+            // width: 'max-content',
             float: message.senderId === currentUser.uid ? 'right' : 'left',
             margin: '0 15px',
+            wordBreak: 'keep-all',
           }}
         >
-          {
-            message.img && (
-              <img src={message.img} alt="" />
-            )
-          }
+          {/* {
+            message.img && (renderImage(message.img))
+          } */}
+          <br />
+          {/* {message.img} */}
           {message.text}
         </div>
       </div>
