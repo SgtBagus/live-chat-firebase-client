@@ -5,8 +5,9 @@ import { LayoutDefault } from "./Layout";
 
 import Home from "./pages/Home";
 import ChatPage from "./pages/Chats";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
+
+import Login from "./pages/Login/";
+import Register from "./pages/Login/Register";
 
 import { AuthContext } from "./context/AuthContext";
 
