@@ -16,16 +16,22 @@ import { db, storage } from "../../../firebase";
 const ChatsCard = ({
     cardTool, children, title,
 }) => {
-    const [allowChat, setAllowChat] = useState([]);
+    const [dataMessage, setMessageData] = useState(
+        {
+            messages: [],
+            allow_chat: false,
+        }
+    );
     const [text, setText] = useState('');
     const [img, setImg] = useState(null);
+    const [onSend, setOnSend] = useState(false);
 
     const { currentUser } = useContext(AuthContext);
     const { data } = useContext(ChatContext);
   
     useEffect(() => {
       const unSub = onSnapshot(doc(db, "chats", data.chatId), (doc) => {
-        doc.exists() && setAllowChat(doc.data().allow_chat);
+        doc.exists() && setMessageData(doc.data());
       });
   
       return () => {
@@ -34,7 +40,10 @@ const ChatsCard = ({
     }, [data.chatId]);
 
     const handleSend = async () => {
+        setOnSend(true);
+
         try {
+            if (!text) throw new Error('Text Message tidak boleh kosong')
             if (img) {
                 const storageRef = ref(storage, uuid());
                 const uploadTask = uploadBytesResumable(storageRef, img);
@@ -79,18 +88,19 @@ const ChatsCard = ({
                 },
                 [data.chatId + ".date"]: serverTimestamp(),
             });
-        
-            setText('');
-            setImg(null);
+            
+            await setText(null);
+            await setImg(null);
+            setOnSend(false);
         } catch (err) {
             alert(err);
+            setOnSend(false);
         }
     }
 
-    console.log(uuid());
-    console.log(data);
-    console.log(currentUser);
     const { minimize, close } = cardTool
+    const { messages, allow_chat: allowChat } = dataMessage
+
     return (
         <div className="card direct-chat direct-chat-warning">
             <div className="card-header">
@@ -119,65 +129,84 @@ const ChatsCard = ({
             <div className="card-body">
                 {children}
             </div>
+            {
+                messages.length > 0 || (
+                    <div className="overlay">
+                        <i className="fas fa-2x fa-sync-alt fa-spin"></i>
+                    </div>
+                )
+            }
             <div className="card-footer">
                 <form action="#" method="post">
-                    <div className='row align-items-end'>
-                        <div className="col-md-3">
-                            <input
-                                id="file"
-                                type="file"
-                                style={{ display: "none" }}
-                                onChange={(e) => {
-                                    console.log(e);
-                                    try {
-                                        setImg(e.target.files[0]);
-                                    } catch {
-                                        setImg(null);
-                                    }
-                                }}
-                            />
-                            <div className="d-flex align-items-center flex-column m-2">            
-                                {
-                                    img && (
+                    <div className='row'>
+                        <div className="col-md-8 my-2">
+                            {
+                                img && (
+                                    <div
+                                        style={{
+                                            borderRadius: '0.3rem',
+                                            backgroundColor: '#d2d6de',
+                                            border: '1px solid #d2d6de',
+                                            margin: '5px',
+                                            padding: '5px',
+                                            position: 'absolute',
+                                            bottom: '60px',
+                                        }}
+                                    >
                                         <img
                                             src={URL.createObjectURL(img)}
-                                            className="mb-2"
-                                            style={{ width: '180px', objectFit: 'cover' }}
+                                            className="m-2"
+                                            style={{ width: '250px', objectFit: 'cover' }}
                                             alt=""
                                         />
-                                    )
-                                }
-                                <label htmlFor="file" style={{ marginBottom: 'unset' }}>
-                                    <ButonComponents
-                                        buttonType="btn-default"
-                                        buttonAction={() => { }}
-                                        buttonText={!img ? "Upload Gambar" : "Ganti Gambar"}
-                                        buttonIcon="fas fa-file"
-                                        style={{ width: '200px' }}
+                                    </div>
+                                )
+                            }
+                            {
+                                allowChat && (
+                                    <input
+                                        type="text"
+                                        name="message"
+                                        placeholder="Type Message ..."
+                                        className="form-control mx-2"
+                                        onChange={(e) => setText(e.target.value)}
+                                        value={text}
                                     />
-                                </label>
-                            </div>
+                                )
+                            }
                         </div>
-                        <div className="col-md-9">
-                            <div className='d-flex m-2'>
-                                {
-                                    allowChat && (
-                                        <input
-                                            type="text"
-                                            name="message"
-                                            placeholder="Type Message ..."
-                                            className="form-control mx-2"
-                                            onChange={(e) => setText(e.target.value)}
-                                            value={text}
-                                        />
-                                    )
-                                }
+                        <div className="col-md-4 my-2">
+                            <div className='d-flex'>
+                                <div className="d-flex align-items-center flex-column w-100 mx-2">
+                                    <input
+                                        id="file"
+                                        type="file"
+                                        style={{ display: "none" }}
+                                        onChange={(e) => {
+                                            try {
+                                                setImg(e.target.files[0]);
+                                            } catch {
+                                                setImg(null);
+                                            }
+                                        }}
+                                    />
+                                    <label htmlFor="file" style={{ marginBottom: 'unset' }}>
+                                        <div
+                                            className="btn btn-default"
+                                            disabled={((img && text) || onSend)}
+                                            style={{ width: '200px' }}
+                                        >
+                                            <i className="fas fa-file mr-2" />
+                                            {!img ? "Upload Gambar" : "Ganti Gambar"}
+                                        </div>
+                                    </label>
+                                </div>
                                 <ButonComponents
-                                    buttonType="btn-primary"
+                                    buttonType="btn-primary w-100 mx-2"
                                     buttonAction={handleSend}
-                                    buttonText="Kirim"
-                                    buttonIcon="fa fa-paper-plane"
-                                    style={{ width: '120px' }}
+                                    buttonText={onSend || 'Kirim'}
+                                    buttonIcon={onSend ? "fas fa-sync-alt fa-spin" : 'fa fa-paper-plane'}
+                                    disabled={onSend || (( text === '') && (img === null) )}
                                 />
                             </div>
                         </div>

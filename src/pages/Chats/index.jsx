@@ -115,32 +115,29 @@ class ChatPage extends Component {
     return (
       <div className="row">
         <div className="col-md-12">
-          {
-            adminData && (
-              <ChatsCard
-                title="Chat to Admin"
-                cardTool={{
-                  minimize: false,
-                  close: false,
-                }}
-                changeForm={this.changeForm}
-                handleSend={this.handleSend}
-                form={{ img, text }}
-              >
-                <GetChats />
-                <div
-                  className="direct-chat-messages"
-                  style={{
-                    height: 'unset',
-                    maxHeight: '600px',
-                  }}>
-                  <div className="direct-chat-msg">
-                    <Messages />
-                  </div>
-                </div>
-              </ChatsCard>
-            )
-          }
+          <ChatsCard
+            title="Chat to Admin"
+            adminData={adminData}
+            cardTool={{
+              minimize: false,
+              close: false,
+            }}
+            changeForm={this.changeForm}
+            handleSend={this.handleSend}
+            form={{ img, text }}
+          >
+            <GetChats />
+            <div
+              className="direct-chat-messages"
+              style={{
+                height: 'unset',
+                maxHeight: '600px',
+              }}>
+              <div className="direct-chat-msg">
+                <Messages />
+              </div>
+            </div>
+          </ChatsCard>
         </div>
       </div>
     );

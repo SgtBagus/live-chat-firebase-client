@@ -1,17 +1,22 @@
 import React from 'react'
 
 const ButonComponents = ({
-    buttonType, buttonAction, buttonText, buttonIcon, style,
+    buttonType, buttonAction, buttonText, buttonIcon, style, disabled,
 }) => {
     return (
-        <div className={`btn ${buttonType}`} onClick={buttonAction} style={ style && (style) }>
+        <button
+            className={`btn ${buttonType}`}
+            onClick={buttonAction}
+            style={style && (style)}
+            disabled={disabled}
+        >
             {
                 buttonIcon && (
                     <i className={`${buttonIcon} mr-2`}></i>
                 )
             }
             {buttonText}
-        </div>
+        </button>
     )
 }
 
