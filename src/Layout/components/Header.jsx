@@ -38,7 +38,16 @@ export const HeaderComponents = ({ dataLogin }) => {
                             <li className="nav-item mx-3">
                                 <div className="user-panel d-flex">
                                     <div className="image">
-                                        <img src={dataLogin.photoURL} alt="User" style={{ borderRadius: '50%' }}/>
+                                        <img
+                                            src={dataLogin.photoURL}
+                                            alt="User"
+                                            style={{
+                                                borderRadius: '50%',
+                                                objectFit: 'cover',
+                                                width: '30px',
+                                                height: '30px',
+                                            }}
+                                        />
                                     </div>
                                     <div className="info d-block">{dataLogin.displayName}</div>
                                 </div>

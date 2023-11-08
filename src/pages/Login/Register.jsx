@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { doc, setDoc } from "firebase/firestore";
 
-import { auth, db, storage } from "../../firebase";
+import { auth, db } from "../../firebase";
+
+import { uploadFile } from "../../data/uploadFile";
 
 import './style.scss';
 
@@ -18,47 +19,33 @@ const Register = () => {
         setLoading(true);
         e.preventDefault();
 
-        console.log(e.target);
         const displayName = e.target[0].value;
         const email = e.target[1].value;
         const password = e.target[2].value;
         const file = e.target[3].files[0];
     
         try {
-            //Create user
             const res = await createUserWithEmailAndPassword(auth, email, password);
-        
-            //Create a unique image name
             const date = new Date().getTime();
-            const storageRef = ref(storage, `${displayName + date}`);
-        
-            await uploadBytesResumable(storageRef, file).then(() => {
-                getDownloadURL(storageRef).then(async (downloadURL) => {
-                    try {
-                        //Update profile
-                        await updateProfile(res.user, {
-                            displayName,
-                            photoURL: downloadURL,
-                        });
-
-                        //create user on firestore
-                        await setDoc(doc(db, "users", res.user.uid), {
-                            uid: res.user.uid,
-                            displayName,
-                            email,
-                            photoURL: downloadURL,
-                            is_admin: false,
-                        });
             
-                        //create empty user chats on firestore
-                        await setDoc(doc(db, "userChats", res.user.uid), {});
-                        navigate("/");
-                    } catch (err) {
-                        setErr(true);
-                        setLoading(false);
-                    }
-                });
+            const uploadImage = await uploadFile(file, `userProfile/${displayName.replaceAll(' ', '_') + date}`);
+        
+            await updateProfile(res.user, {
+                displayName,
+                photoURL: uploadImage,
             });
+            
+            await setDoc(doc(db, "users", res.user.uid), {
+                uid: res.user.uid,
+                displayName,
+                email,
+                photoURL: uploadImage,
+                is_admin: false,
+            });
+
+            //create empty user chats on firestore
+            await setDoc(doc(db, "userChats", res.user.uid), {});
+            navigate("/");
         } catch (err) {
             setErr(true);
             setLoading(false);

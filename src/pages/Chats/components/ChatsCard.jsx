@@ -4,14 +4,15 @@ import { v4 as uuid } from "uuid";
 import {
   arrayUnion, doc, onSnapshot, serverTimestamp, Timestamp, updateDoc,
 } from "firebase/firestore";
-import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 
 import ButonComponents from '../../../components/Button';
 
 import { ChatContext } from "../../../context/ChatContext";
 import { AuthContext } from "../../../context/AuthContext";
 
-import { db, storage } from "../../../firebase";
+import { db } from "../../../firebase";
+import { uploadFile } from "../../../data/uploadFile";
+import { checkThisFileIsImageOrNot } from "../../../Helper/checkFile";
 
 const ChatsCard = ({
     cardTool, children, title,
@@ -23,7 +24,7 @@ const ChatsCard = ({
         }
     );
     const [text, setText] = useState('');
-    const [img, setImg] = useState(null);
+    const [file, setFile] = useState(null);
     const [onSend, setOnSend] = useState(false);
 
     const { currentUser } = useContext(AuthContext);
@@ -43,23 +44,22 @@ const ChatsCard = ({
         setOnSend(true);
 
         try {
-            if (img) {
-                const storageRef = ref(storage, uuid());
-                console.log(storageRef);
-                const uploadTask = uploadBytesResumable(storageRef, img);
-            
-                await uploadTask.on((error) => { alert(error); }, async () => {
-                    await getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
-                        await updateDoc(doc(db, "chats", data.chatId), {
-                            messages: arrayUnion({
-                                id: uuid(),
-                                text,
-                                senderId: currentUser.uid,
-                                date: Timestamp.now(),
-                                img: downloadURL,
-                            }),
-                        });
-                    });
+            if (file) {
+                const thisFileisImage = checkThisFileIsImageOrNot(file);
+
+                if (!thisFileisImage) throw new Error ('Hanya Boleh Mengupload Gambar');
+                // const pathUpload = checkThisFileIsImageOrNot(file) ? 'message/images/' : 'message/videos/';
+
+                const uploadImage = await uploadFile(file, 'message/images/');
+                
+                await updateDoc(doc(db, "chats", data.chatId), {
+                    messages: arrayUnion({
+                        id: uuid(),
+                        text,
+                        senderId: currentUser.uid,
+                        date: Timestamp.now(),
+                        img: uploadImage,
+                    }),
                 });
             } else {
                 await updateDoc(doc(db, "chats", data.chatId), {
@@ -87,11 +87,11 @@ const ChatsCard = ({
             });
             
             await setText('');
-            await setImg(null);
+            await setFile(null);
         } catch (err) {
             alert(err);
         } finally {
-            setOnSend(false);
+            await setOnSend(false);
         }
     }
 
@@ -138,8 +138,9 @@ const ChatsCard = ({
                     <div className='row'>
                         <div className="col-md-8 my-2">
                             {
-                                img && (
+                                file && (
                                     <div
+                                        className="shadow"
                                         style={{
                                             borderRadius: '0.3rem',
                                             backgroundColor: '#d2d6de',
@@ -150,12 +151,23 @@ const ChatsCard = ({
                                             bottom: '60px',
                                         }}
                                     >
-                                        <img
-                                            src={URL.createObjectURL(img)}
-                                            className="m-2"
-                                            style={{ width: '250px', objectFit: 'cover' }}
-                                            alt=""
-                                        />
+                                        {
+                                            checkThisFileIsImageOrNot(file)
+                                            ? (
+                                                <img
+                                                    src={URL.createObjectURL(file)}
+                                                    className="m-2"
+                                                    style={{ width: '400px', objectFit: 'cover' }}
+                                                    alt=""
+                                                />
+                                            )
+                                            : ( 
+                                                <video className="m-2" width="400px" controls style={{ objectFit: 'cover' }}>
+                                                    <source src={URL.createObjectURL(file)} type="video/mp4" />
+                                                    Your browser does not support HTML video.
+                                                </video>
+                                            )
+                                        }
                                     </div>
                                 )
                             }
@@ -178,23 +190,24 @@ const ChatsCard = ({
                                     <input
                                         id="file"
                                         type="file"
+                                        accept="image/png, image/gif, image/jpeg"
                                         style={{ display: "none" }}
                                         onChange={(e) => {
                                             try {
-                                                setImg(e.target.files[0]);
+                                                setFile(e.target.files[0]);
                                             } catch {
-                                                setImg(null);
+                                                setFile(null);
                                             }
                                         }}
                                     />
                                     <label htmlFor="file" style={{ marginBottom: 'unset' }}>
                                         <div
                                             className="btn btn-default"
-                                            disabled={((img && text) || onSend)}
+                                            disabled={((file && text) || onSend)}
                                             style={{ width: '200px' }}
                                         >
                                             <i className="fas fa-file mr-2" />
-                                            {!img ? "Upload Gambar" : "Ganti Gambar"}
+                                            {!file ? "Upload Gambar" : "Ganti Gambar"}
                                         </div>
                                     </label>
                                 </div>
@@ -203,7 +216,7 @@ const ChatsCard = ({
                                     buttonAction={handleSend}
                                     buttonText={onSend || 'Kirim'}
                                     buttonIcon={onSend ? "fas fa-sync-alt fa-spin" : 'fa fa-paper-plane'}
-                                    disabled={onSend || (( text === '') && (img === null) )}
+                                    disabled={onSend || (( text === '') && (file === null) )}
                                 />
                             </div>
                         </div>
