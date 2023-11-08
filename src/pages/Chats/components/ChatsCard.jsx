@@ -152,7 +152,10 @@ const ChatsCard = ({
                                             margin: '5px',
                                             padding: '5px',
                                             position: 'absolute',
-                                            bottom: '60px',
+                                            bottom: '40px',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            alignItems: 'center',
                                         }}
                                     >
                                         {
@@ -172,6 +175,12 @@ const ChatsCard = ({
                                                 </video>
                                             )
                                         }
+                                        <ButonComponents
+                                            buttonType="btn-default m2"
+                                            buttonAction={() => setFile(null)}
+                                            buttonText="Hapus File"
+                                            buttonIcon="fa fa-trash"
+                                        />
                                     </div>
                                 )
                             }
