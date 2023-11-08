@@ -1,6 +1,8 @@
 import React, { useContext, useEffect, useRef } from "react";
+
 import { AuthContext } from "../../../context/AuthContext";
 import { ChatContext } from "../../../context/ChatContext";
+
 import { checkfileUrl } from "../../../Helper/checkFile";
 
 const Message = ({ message }) => {
@@ -43,7 +45,9 @@ const Message = ({ message }) => {
           }
         </span>
       </div>
-      <div className="d-flex flex-row-reverse">
+      <div
+        className={`d-flex ${message.senderId === currentUser.uid && 'flex-row-reverse'}`}
+      >
         <img
           className="direct-chat-img"
           src={message.senderId === currentUser.uid ? currentUser.photoURL : data.user.photoURL}
@@ -53,11 +57,9 @@ const Message = ({ message }) => {
           {
             message.img && (
               <div
-                className="direct-chat-text my-2"
+                className="m-2"
                 style={{
                   float: message.senderId === currentUser.uid ? 'right' : 'left',
-                  margin: '0 15px',
-                  wordBreak: 'keep-all',
                 }}
               >
                 {

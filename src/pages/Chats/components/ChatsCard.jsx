@@ -48,7 +48,6 @@ const ChatsCard = ({
                 const thisFileisImage = checkThisFileIsImageOrNot(file);
 
                 if (!thisFileisImage) throw new Error ('Hanya Boleh Mengupload Gambar');
-                // const pathUpload = checkThisFileIsImageOrNot(file) ? 'message/images/' : 'message/videos/';
 
                 const uploadImage = await uploadFile(file, 'message/images/');
                 
@@ -71,17 +70,22 @@ const ChatsCard = ({
                     }),
                 });
             }
-        
+
+            let lastMessageText = text;
+            if (file && text === '') {
+                lastMessageText = checkThisFileIsImageOrNot(file) ? 'Mengkirimkan Gambar' : 'Mengikirimkan Video';
+            }
+          
             await updateDoc(doc(db, "userChats", currentUser.uid), {
                 [data.chatId + ".lastMessage"]: {
-                    text,
+                    text: lastMessageText,
                 },
                 [data.chatId + ".date"]: serverTimestamp(),
             });
         
             await updateDoc(doc(db, "userChats", data.user.uid), {
                 [data.chatId + ".lastMessage"]: {
-                    text,
+                    text: lastMessageText,
                 },
                 [data.chatId + ".date"]: serverTimestamp(),
             });

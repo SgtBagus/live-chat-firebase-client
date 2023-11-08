@@ -9,7 +9,6 @@ export const checkThisFileIsImageOrNot = ({ type }) => {
     }
 }
 
-
 const getFileExtension = (fileName) => fileName.replace(/^.*\./, '');
 
 const isIMage = (fileName) => {
