@@ -1,5 +1,7 @@
-import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import React, { PureComponent } from "react";
+import update from 'immutability-helper';
+import { FieldFeedback, FieldFeedbacks } from 'react-form-with-constraints';
+import { NotificationContainer, NotificationManager } from 'react-notifications';
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 
@@ -7,138 +9,275 @@ import { auth, db } from "../../firebase";
 
 import { uploadFile } from "../../data/uploadFile";
 
+import FormValidation from "../../components/FormValidation";
+import InputText from "../../components/form/InputText";
+import InputEmail from "../../components/form/InputEmail";
+import InputPassword from "../../components/form/InputPassword";
+import ButonComponents from '../../components/Button';
+
+import { GENERATE_ERROR_MESSAGE, validateEmail } from "../../Helper/error";
+
+import imageDefault from './defaultImage.png';
+import 'react-notifications/lib/notifications.css';
 import './style.scss';
 
-const Register = () => {
-    const [img, setImg] = useState(null);
-    const [err, setErr] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
-
-    const handleSubmit = async (e) => {
-        setLoading(true);
-        e.preventDefault();
-
-        const displayName = e.target[0].value;
-        const email = e.target[1].value;
-        const password = e.target[2].value;
-        const file = e.target[3].files[0];
+class Register extends PureComponent {
+    constructor(props) {
+        super(props);
     
+        this.state = {
+            form: {
+                name: '',
+                email: '',
+                password: '',
+                repreatPassword: '',
+                file: null,
+            },
+            loading: false,
+            isFormSubmitted: false,
+        };
+    }
+    
+    _onInputChangeValidate = ({ target }) => {
+        this.form.validateInput(target);
+    };
+
+    _changeInputHandler = async (type, val, e) => {
+        const { form, isFormSubmitted } = this.state;
+
+        if (isFormSubmitted) {
+            const onInputChangeValidate = this._onInputChangeValidate(e);
+            await onInputChangeValidate;
+        }
+
+        const newForm = update(form, {
+            [type]: { $set: val },
+        });
+
+        this.setState({
+            form: newForm,
+        });
+    };
+
+    submitHandel = async () => {
+        const { form: { file } } = this.state;
+
+        const isFormValid = await this.form.validateForm();
+
+        if (!file) {
+            NotificationManager.error('Mohon Upload Foto Anda', 'Click me!', 5000);
+        }
+
+        if (isFormValid) {
+            this.setState({
+                loading: true,
+            }, async () => {
+                await this.handleSubmit();
+            });
+        }
+    
+        this.setState({
+          isFormSubmitted: true,
+        });
+    }
+
+    handleSubmit = async () => {
+        const {
+            form : {
+                name, email, password, file,
+            }
+        } = this.state;
+        
         try {
             const res = await createUserWithEmailAndPassword(auth, email, password);
+            if (!res) this.handleExpectedError('Email Tersebut Sudah Terdaftar');
+
             const date = new Date().getTime();
-            
-            const uploadImage = await uploadFile(file, `userProfile/${displayName.replaceAll(' ', '_') + date}`);
+            const uploadImage = await uploadFile(file, `userProfile/${name.replaceAll(' ', '_') + date}`);
+            if (!uploadImage) this.handleExpectedError('Foto Tidak Terupload');
         
-            await updateProfile(res.user, {
-                displayName,
+            const updateProfileRes = await updateProfile(res.user, {
+                displayName: name,
                 photoURL: uploadImage,
             });
+            if (!updateProfileRes) this.handleExpectedError('Gagal Mengganti Foto Anda');
             
-            await setDoc(doc(db, "users", res.user.uid), {
+            const setUserRes = await setDoc(doc(db, "users", res.user.uid), {
                 uid: res.user.uid,
-                displayName,
+                displayName: name,
                 email,
                 photoURL: uploadImage,
                 is_admin: false,
             });
+            if (!setUserRes) this.handleExpectedError('Gagal Mendaftar');
 
-            //create empty user chats on firestore
-            await setDoc(doc(db, "userChats", res.user.uid), {});
-            navigate("/");
+            // //create empty user chats on firestore
+            const setDocRes = await setDoc(doc(db, "userChats", res.user.uid), {});
+            if (!setDocRes) this.handleExpectedError('Gagal membuat Sistem Chat');
+
+            window.location.href = "/";
         } catch (err) {
-            setErr(true);
-            setLoading(false);
+            console.log(err);
         }
-      };
+    };
 
-  return (
-    <div className="loginContiner">
-        <div className="login-box">
-            <div className="login-logo">
-                <Link to="/">
-                    <b>Admin</b>LTE
-                </Link>
-            </div>
-            <div className="card">
-                <div className="card-body login-card-body">
-                    <p className="login-box-msg">Daftarkan Diri Anda !</p>
+    handleExpectedError = (text) => {
+        NotificationManager.error(text, 'Terjadi Kesalahan', 5000);
+    }
 
-                    <form onSubmit={handleSubmit} method="post">
-                        <div className="input-group mb-3">
-                            <input type="text" className="form-control" placeholder="Nama Anda" required />
-                            <div className="input-group-append">
-                                <div className="input-group-text">
-                                    <span className="fas fa-user"></span>
+    render() {
+        const {
+            form: {
+                name, email, password, repreatPassword, file,
+            },
+            loading,
+        } = this.state;
+
+        return (
+            <div className="loginContiner">
+                <div className="login-box">
+                    <div className="login-logo">
+                        <b>Admin</b>LTE
+                    </div>
+                    <div className="card">
+                        <div className="card-body login-card-body">
+                            <p className="login-box-msg">Daftarkan Diri Anda !</p>
+
+                            <FormValidation ref={(c) => { this.form = c; }}>
+                                <div className="d-flex flex-column mb-2">
+                                    <InputText
+                                        name="namePerson"
+                                        placeholder="Nama Anda"
+                                        value={name}
+                                        changeEvent={(val, e) => this._changeInputHandler('name', val, e)}
+                                        required
+                                    />
+                                    <FieldFeedbacks for="namePerson">
+                                        <FieldFeedback when="valueMissing">
+                                            {GENERATE_ERROR_MESSAGE('Nama Anda', 'valueMissing')}
+                                        </FieldFeedback>
+                                    </FieldFeedbacks>
                                 </div>
-                            </div>
-                        </div>
-                        <div className="input-group mb-3">
-                            <input type="email" className="form-control" placeholder="Email" required />
-                            <div className="input-group-append">
-                                <div className="input-group-text">
-                                    <span className="fas fa-envelope"></span>
+                                <div className="d-flex flex-column mb-2">
+                                    <InputEmail
+                                        placeholder="Email"
+                                        id="email"
+                                        name="emailPerson"
+                                        value={email}
+                                        changeEvent={(val, e) => this._changeInputHandler('email', val, e)}
+                                        required
+                                    />
+                                    <FieldFeedbacks for="emailPerson">
+                                        <div>
+                                            <FieldFeedback when="valueMissing">
+                                                {GENERATE_ERROR_MESSAGE('Email Anda', 'valueMissing')}
+                                            </FieldFeedback>
+                                            <FieldFeedback when={val => !validateEmail(val)}>
+                                                {GENERATE_ERROR_MESSAGE('Email Anda', 'emailInvalid')}
+                                            </FieldFeedback>
+                                        </div>
+                                    </FieldFeedbacks>
                                 </div>
-                            </div>
-                        </div>
-                        <div className="input-group mb-3">
-                            <input type="password" className="form-control" placeholder="Password" required />
-                            <div className="input-group-append">
-                                <div className="input-group-text">
-                                    <span className="fas fa-lock"></span>
+                                <div className="d-flex flex-column mb-2">
+                                    <InputPassword
+                                        placeholder="Password"
+                                        name="password"
+                                        changeEvent={(val, e) => this._changeInputHandler('password', val, e)}
+                                        value={password}
+                                        required
+                                    />
+                                    <FieldFeedbacks for="password">
+                                        <FieldFeedback when="valueMissing">
+                                            {GENERATE_ERROR_MESSAGE('Password Anda', 'valueMissing')}
+                                        </FieldFeedback>
+                                    </FieldFeedbacks>
                                 </div>
-                            </div>
-                        </div>
-                        <div className="input-group mb-3">
-                            <input
-                                required
-                                style={{ display: "none" }}
-                                type="file"
-                                id="file" 
-                                onChange={(e) => {
-                                    try {
-                                        setImg(e.target.files[0]);
-                                    } catch {
-                                        setImg(null);
-                                    }
-                                }}
-                            />
-                            <label htmlFor="file" className="w-100" style={{ marginBottom: 'unset' }}>
-                                {
-                                    img && (
+                                <div className="d-flex flex-column mb-2">
+                                    <InputPassword
+                                        placeholder="Ulangi Password Anda"
+                                        name="repreatPassword"
+                                        changeEvent={(val, e) => this._changeInputHandler('repreatPassword', val, e)}
+                                        value={repreatPassword}
+                                        required
+                                    />
+                                    <FieldFeedbacks for="repreatPassword">
+                                        <div>
+                                            <FieldFeedback when="valueMissing">
+                                                {GENERATE_ERROR_MESSAGE('Ulangi Password Anda', 'valueMissing')}
+                                            </FieldFeedback>
+                                            <FieldFeedback when={val => (val !== password)}>
+                                                {GENERATE_ERROR_MESSAGE('Password Anda Tidak Sama', 'valueMissing')}
+                                            </FieldFeedback>
+                                        </div>
+                                    </FieldFeedbacks>
+                                </div>
+                                <div className="d-flex flex-column mb-2">
+                                    <div className="d-flex align-items-center">
                                         <img
-                                            src={URL.createObjectURL(img)}
-                                            className="w-100 mb-2"
-                                            style={{ objectFit: 'cover', borderRadius: '5px'}}
-                                            alt=""
+                                            src={file ? URL.createObjectURL(file) : imageDefault}
+                                            className="mr-2"
+                                            style={{
+                                                objectFit: 'cover',
+                                                borderRadius: '50%',
+                                                width: '100px',
+                                                height: '100px',
+                                            }}
+                                            alt="Register User"
                                         />
-                                    )
-                                }
-                                <div className="btn btn-default btn-block">
-                                    <i className="fas fa-file mr-2" />
-                                    Upload Foto Anda
+                                        <div className="ml-2 w-100">
+                                            <input
+                                                required
+                                                style={{ display: "none" }}
+                                                type="file"
+                                                id="file" 
+                                                accept="image/png, image/jpeg, image/jpg"
+                                                onChange={(e) => {
+                                                    try {
+                                                        this._changeInputHandler('file', e.target.files[0], e);
+                                                    } catch {
+                                                        this._changeInputHandler('file', null, e);
+                                                    }
+                                                }}
+                                            />
+                                            <label htmlFor="file" className="w-100" style={{ marginBottom: 'unset' }}>
+                                                <div className="btn btn-default btn-block">
+                                                    <i className="fas fa-file mx-2" />
+                                                    Upload Foto Anda
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
                                 </div>
-                            </label>
-                        </div>
-                        <div className="row">
-                            <div className="col-12">
-                                <button type="submit" disabled={loading} className="btn btn-primary btn-block">
-                                    Sign In
-                                </button>                    
-                                {loading && "Uploading and compressing the image please wait..."}
-                                {err && <span>Something went wrong</span>}
-                            </div>
-                        </div>
-                    </form>
+                                <div className="row">
+                                    <div className="col-12">
+                                        <ButonComponents
+                                            type="button"
+                                            buttonType="btn btn-primary btn-block"
+                                            buttonAction={() => { this.submitHandel(); }}
+                                            buttonText={loading ? 'Memperoses' : 'Daftar'}
+                                            buttonIcon={loading ? 'fas fa-sync-alt fa-spin' : 'fas fa-sign-in-alt'}
+                                            disabled={loading}
+                                        />
+                                        {/* {err && <span>Something went wrong</span>} */}
+                                    </div>
+                                </div>
+                            </FormValidation>
 
-                    <p className="m-2 text-center">
-                        <Link to="/login">Sudah Jadi Pengguna</Link>
-                    </p>
+                            <p
+                                className="m-2 text-center" 
+                                onClick={() => window.location.href = "/login" }
+                                style={{ cursor: 'pointer' }}
+                            >
+                                Sudah Jadi Pengguna
+                            </p>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-    </div>
-  );
-};
+                
 
+                <NotificationContainer />
+            </div>
+        )
+    }
+};
 export default Register;

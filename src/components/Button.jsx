@@ -1,10 +1,11 @@
 import React from 'react'
 
 const ButonComponents = ({
-    buttonType, buttonAction, buttonText, buttonIcon, style, disabled,
+    buttonType, buttonAction, buttonText, buttonIcon, style, disabled, type,
 }) => {
     return (
         <button
+            type={type}
             className={`btn ${buttonType}`}
             onClick={buttonAction}
             style={style && (style)}
