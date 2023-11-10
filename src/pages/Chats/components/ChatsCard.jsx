@@ -1,18 +1,21 @@
 import React, { useContext, useEffect, useState } from "react";
 import { v4 as uuid } from "uuid";
-
+import { NotificationContainer, NotificationManager } from 'react-notifications';
 import {
   arrayUnion, doc, onSnapshot, serverTimestamp, Timestamp, updateDoc,
 } from "firebase/firestore";
+
+import { db } from "../../../firebase";
 
 import ButonComponents from '../../../components/Button';
 
 import { ChatContext } from "../../../context/ChatContext";
 import { AuthContext } from "../../../context/AuthContext";
 
-import { db } from "../../../firebase";
 import { uploadFile } from "../../../data/uploadFile";
+
 import { checkThisFileIsImageOrNot } from "../../../Helper/checkFile";
+import { catchError } from "../../../Helper/helper";
 
 const ChatsCard = ({
     cardTool, children, title,
@@ -31,13 +34,20 @@ const ChatsCard = ({
     const { data } = useContext(ChatContext);
   
     useEffect(() => {
-      const unSub = onSnapshot(doc(db, "chats", data.chatId), (doc) => {
-        doc.exists() && setMessageData(doc.data());
-      });
-  
-      return () => {
-        unSub();
-      };
+        const unSub = onSnapshot(
+            doc(db, "chats", data.chatId),
+            (doc) => {
+                if (doc.exists()) {
+                    setMessageData(doc.data());
+                }
+            }, (err) => {
+                NotificationManager.error(catchError(err), 'Terjadi Kesalahan', 5000);
+            }
+        );
+    
+        return () => {
+            data.chatId !== 'null' && unSub();
+        };
     }, [data.chatId]);
 
     const handleSend = async () => {
@@ -46,7 +56,6 @@ const ChatsCard = ({
         try {
             if (file) {
                 const thisFileisImage = checkThisFileIsImageOrNot(file);
-
                 if (!thisFileisImage) throw new Error ('Hanya Boleh Mengupload Gambar');
 
                 const uploadImage = await uploadFile(file, 'message/images/');
@@ -93,9 +102,18 @@ const ChatsCard = ({
             await setText('');
             await setFile(null);
         } catch (err) {
-            alert(err);
+            NotificationManager.error(catchError(err), 'Terjadi Kesalahan', 5000);
         } finally {
             await setOnSend(false);
+        }
+    }
+
+    const checkImage = (e) => {
+        const thisFileisImage = checkThisFileIsImageOrNot(e.target.files[0]);
+        if (!thisFileisImage) {
+            NotificationManager.warning('Hanya Boleh Mengungah Gamabr', 'Terjadi Kesalahan', 5000);
+        } else {
+            setFile(e.target.files[0]);
         }
     }
 
@@ -138,104 +156,105 @@ const ChatsCard = ({
                 )
             }
             <div className="card-footer">
-                {/* <form action="#" method="post"> */}
-                    <div className='row'>
-                        <div className="col-md-8 my-2">
-                            {
-                                file && (
-                                    <div
-                                        className="shadow"
-                                        style={{
-                                            borderRadius: '0.3rem',
-                                            backgroundColor: '#d2d6de',
-                                            border: '1px solid #d2d6de',
-                                            margin: '5px',
-                                            padding: '5px',
-                                            position: 'absolute',
-                                            bottom: '40px',
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            alignItems: 'center',
-                                        }}
-                                    >
-                                        {
-                                            checkThisFileIsImageOrNot(file)
-                                            ? (
-                                                <img
-                                                    src={URL.createObjectURL(file)}
-                                                    className="m-2"
-                                                    style={{ width: '400px', objectFit: 'cover' }}
-                                                    alt=""
-                                                />
-                                            )
-                                            : ( 
-                                                <video className="m-2" width="400px" controls style={{ objectFit: 'cover' }}>
-                                                    <source src={URL.createObjectURL(file)} type="video/mp4" />
-                                                    Your browser does not support HTML video.
-                                                </video>
-                                            )
-                                        }
-                                        <ButonComponents
-                                            buttonType="btn-default m2"
-                                            buttonAction={() => setFile(null)}
-                                            buttonText="Hapus File"
-                                            buttonIcon="fa fa-trash"
-                                        />
-                                    </div>
-                                )
-                            }
-                            {
-                                allowChat && (
-                                    <input
-                                        type="text"
-                                        name="message"
-                                        placeholder="Type Message ..."
-                                        className="form-control mx-2"
-                                        onChange={(e) => setText(e.target.value)}
-                                        value={text}
+                <div className='row'>
+                    <div className="col-md-6 my-2">
+                        {
+                            file && (
+                                <div
+                                    className="shadow"
+                                    style={{
+                                        borderRadius: '0.3rem',
+                                        backgroundColor: '#d2d6de',
+                                        border: '1px solid #d2d6de',
+                                        margin: '5px',
+                                        padding: '5px',
+                                        position: 'absolute',
+                                        bottom: '40px',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                    }}
+                                >
+                                    {
+                                        checkThisFileIsImageOrNot(file)
+                                        ? (
+                                            <img
+                                                src={URL.createObjectURL(file)}
+                                                className="m-2"
+                                                style={{ width: '400px', objectFit: 'cover' }}
+                                                alt=""
+                                            />
+                                        )
+                                        : ( 
+                                            <video className="m-2" width="400px" controls style={{ objectFit: 'cover' }}>
+                                                <source src={URL.createObjectURL(file)} type="video/mp4" />
+                                                Your browser does not support HTML video.
+                                            </video>
+                                        )
+                                    }
+                                    <ButonComponents
+                                        buttonType="btn-default m2"
+                                        buttonAction={() => setFile(null)}
+                                        buttonText="Hapus File"
+                                        buttonIcon="fa fa-trash"
                                     />
-                                )
-                            }
-                        </div>
-                        <div className="col-md-4 my-2">
-                            <div className='d-flex'>
-                                <div className="d-flex align-items-center flex-column w-100 mx-2">
-                                    <input
-                                        id="file"
-                                        type="file"
-                                        accept="image/png, image/gif, image/jpeg"
-                                        style={{ display: "none" }}
-                                        onChange={(e) => {
-                                            try {
-                                                setFile(e.target.files[0]);
-                                            } catch {
-                                                setFile(null);
-                                            }
-                                        }}
-                                    />
-                                    <label htmlFor="file" style={{ marginBottom: 'unset' }}>
-                                        <div
-                                            className="btn btn-default"
-                                            disabled={((file && text) || onSend)}
-                                            style={{ width: '200px' }}
-                                        >
-                                            <i className="fas fa-file mr-2" />
-                                            {!file ? "Upload Gambar" : "Ganti Gambar"}
-                                        </div>
-                                    </label>
                                 </div>
-                                <ButonComponents
-                                    buttonType="btn-primary w-100 mx-2"
-                                    buttonAction={handleSend}
-                                    buttonText={onSend || 'Kirim'}
-                                    buttonIcon={onSend ? "fas fa-sync-alt fa-spin" : 'fa fa-paper-plane'}
-                                    disabled={onSend || (( text === '') && (file === null) )}
+                            )
+                        }
+                        {
+                            allowChat && (
+                                <input
+                                    type="text"
+                                    name="message"
+                                    placeholder="Isi Pesan Anda..."
+                                    className="form-control mx-2"
+                                    onChange={(e) => setText(e.target.value)}
+                                    value={text}
                                 />
+                            )
+                        }
+                    </div>
+                    <div className="col-md-6 my-2">
+                        <div className='d-flex'>
+                            <div className="d-flex align-items-center flex-column w-100 mx-2">
+                                <input
+                                    id="file"
+                                    type="file"
+                                    accept="image/png, image/gif, image/jpeg"
+                                    style={{ display: "none" }}
+                                    onChange={(e) => {
+                                        try {
+                                            checkImage(e);
+                                        } catch {
+                                            setFile(null);
+                                        }
+                                    }}
+                                />
+                                <label htmlFor="file" style={{ marginBottom: 'unset' }}>
+                                    <div
+                                        className="btn btn-default"
+                                        disabled={((file && text) || onSend)}
+                                        style={{ width: '200px' }}
+                                    >
+                                        <i className="fas fa-file mr-2" />
+                                        {!file ? "Upload Gambar" : "Ganti Gambar"}
+                                    </div>
+                                </label>
                             </div>
+                            <ButonComponents
+                                type="button"
+                                buttonType="btn-primary w-100 mx-2"
+                                buttonAction={handleSend}
+                                buttonText={onSend || 'Kirim'}
+                                buttonIcon={onSend ? "fas fa-sync-alt fa-spin" : 'fa fa-paper-plane'}
+                                disabled={onSend || (( text === '') && (file === null) )}
+                            />
                         </div>
                     </div>
-                {/* </form> */}
+                </div>
             </div>
+            
+            <NotificationContainer />
         </div>
     )
 }

@@ -1,4 +1,4 @@
-import React, { PureComponent } from "react";
+import React, { Component } from "react";
 import update from 'immutability-helper';
 import { FieldFeedback, FieldFeedbacks } from 'react-form-with-constraints';
 import { NotificationContainer, NotificationManager } from 'react-notifications';
@@ -16,12 +16,13 @@ import InputPassword from "../../components/form/InputPassword";
 import ButonComponents from '../../components/Button';
 
 import { GENERATE_ERROR_MESSAGE, validateEmail } from "../../Helper/error";
+import { catchError } from "../../Helper/helper";
 
 import imageDefault from './defaultImage.png';
 import 'react-notifications/lib/notifications.css';
 import './style.scss';
 
-class Register extends PureComponent {
+class Register extends Component {
     constructor(props) {
         super(props);
     
@@ -87,14 +88,14 @@ class Register extends PureComponent {
                 name, email, password, file,
             }
         } = this.state;
-        
+
         try {
             const res = await createUserWithEmailAndPassword(auth, email, password);
-            if (!res) this.handleExpectedError('Email Tersebut Sudah Terdaftar');
+            if (!res) throw new Error('Email Tersebut Sudah Terdaftar');
 
             const date = new Date().getTime();
             const uploadImage = await uploadFile(file, `userProfile/${name.replaceAll(' ', '_') + date}`);
-            if (!uploadImage) this.handleExpectedError('Foto Tidak Terupload');
+            if (!uploadImage) throw new Error('Foto Tidak Terupload');
         
             const updateProfileRes = await updateProfile(res.user, {
                 displayName: name,
@@ -109,15 +110,20 @@ class Register extends PureComponent {
                 photoURL: uploadImage,
                 is_admin: false,
             });
-            if (!setUserRes) this.handleExpectedError('Gagal Mendaftar');
+            if (!setUserRes) throw new Error('Gagal Mendaftar');
 
             // //create empty user chats on firestore
             const setDocRes = await setDoc(doc(db, "userChats", res.user.uid), {});
-            if (!setDocRes) this.handleExpectedError('Gagal membuat Sistem Chat');
+            if (!setDocRes) throw new Error('Gagal membuat Sistem Chat');
 
             window.location.href = "/";
         } catch (err) {
-            console.log(err);
+            this.setState({
+                loading: false,
+            }, async () => {
+                const errorText = catchError(err);
+                this.handleExpectedError(errorText);
+            });
         }
     };
 
@@ -136,7 +142,11 @@ class Register extends PureComponent {
         return (
             <div className="loginContiner">
                 <div className="login-box">
-                    <div className="login-logo">
+                    <div
+                        className="login-logo" 
+                        onClick={() => window.location.href = "/" }
+                        style={{ cursor: 'pointer' }}
+                    >
                         <b>Admin</b>LTE
                     </div>
                     <div className="card">
@@ -258,7 +268,6 @@ class Register extends PureComponent {
                                             buttonIcon={loading ? 'fas fa-sync-alt fa-spin' : 'fas fa-sign-in-alt'}
                                             disabled={loading}
                                         />
-                                        {/* {err && <span>Something went wrong</span>} */}
                                     </div>
                                 </div>
                             </FormValidation>
@@ -274,7 +283,6 @@ class Register extends PureComponent {
                     </div>
                 </div>
                 
-
                 <NotificationContainer />
             </div>
         )
