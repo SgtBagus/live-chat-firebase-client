@@ -1,6 +1,8 @@
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import { NotificationManager } from 'react-notifications';
 
 import { storage } from "../firebase";
+import { catchError } from "../Helper/helper";
 
 export const uploadFile = async (file, pathUpload) => {
     const { name } = file;
@@ -13,6 +15,6 @@ export const uploadFile = async (file, pathUpload) => {
 
         return await getDownloadURL(ref(storage, directionPathFile));
     } catch (err) {
-        alert(err);
+        NotificationManager.error(catchError(err), 'Terjadi Kesalahan', 5000);
     }
 }

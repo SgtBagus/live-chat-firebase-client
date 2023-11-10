@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { NotificationContainer, NotificationManager } from 'react-notifications';
 import {
   collection, query, where, getDocs, setDoc,
   doc, updateDoc, serverTimestamp, getDoc,
@@ -10,6 +11,7 @@ import Messages from './components/Messages'
 import ChatsCard from './components/ChatsCard';
 
 import GetChats from './config/GetChat';
+import { catchError } from '../../Helper/helper';
 
 
 class ChatPage extends Component {
@@ -41,7 +43,7 @@ class ChatPage extends Component {
         this.setupMessageBox();
       })
     } catch (err) {
-      alert("Something Wrong find User");
+      NotificationManager.error(catchError(err), 'Terjadi Kesalahan', 5000);
     }
   }
   
@@ -62,7 +64,7 @@ class ChatPage extends Component {
         this.setNewMessage(combinedId);
       }
     } catch (err) {
-      alert('Error when Create a new Chats');
+      NotificationManager.error(catchError(err), 'Terjadi Kesalahan', 5000);
     }
   }
 
@@ -139,6 +141,8 @@ class ChatPage extends Component {
             </div>
           </ChatsCard>
         </div>
+            
+        <NotificationContainer />
       </div>
     );
   }
