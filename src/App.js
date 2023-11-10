@@ -7,6 +7,7 @@ import Home from "./pages/Home";
 import ChatPage from "./pages/Chats";
 
 import Login from "./pages/Login/";
+import ForgotPassword from "./pages/Login/ForgotPassword";
 import Register from "./pages/Login/Register";
 
 import { AuthContext } from "./context/AuthContext";
@@ -46,6 +47,7 @@ function App() {
           }
         />
         <Route path="login" element={<Login />} />
+        <Route path="lupa-password" element={<ForgotPassword />} />
         <Route path="register" element={<Register />} />
       </Routes>
     </BrowserRouter>

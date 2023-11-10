@@ -4,6 +4,8 @@ import { NotificationContainer, NotificationManager } from 'react-notifications'
 import {
   arrayUnion, doc, onSnapshot, serverTimestamp, Timestamp, updateDoc,
 } from "firebase/firestore";
+// import { sendEmailVerification } from "firebase/auth";
+
 
 import { db } from "../../../firebase";
 
@@ -18,14 +20,10 @@ import { checkThisFileIsImageOrNot } from "../../../Helper/checkFile";
 import { catchError } from "../../../Helper/helper";
 
 const ChatsCard = ({
-    cardTool, children, title,
+    cardTool, children, title, adminData,
 }) => {
-    const [dataMessage, setMessageData] = useState(
-        {
-            messages: [],
-            allow_chat: false,
-        }
-    );
+    const [dataMessage, setMessageData] = useState({ messages: [], allow_chat: false });
+    const [chatCheckValid, setchatCheckValid] = useState(false);
     const [text, setText] = useState('');
     const [file, setFile] = useState(null);
     const [onSend, setOnSend] = useState(false);
@@ -34,11 +32,13 @@ const ChatsCard = ({
     const { data } = useContext(ChatContext);
   
     useEffect(() => {
+        // sendEmailVerification(currentUser);
         const unSub = onSnapshot(
             doc(db, "chats", data.chatId),
             (doc) => {
                 if (doc.exists()) {
                     setMessageData(doc.data());
+                    setchatCheckValid(true);
                 }
             }, (err) => {
                 NotificationManager.error(catchError(err), 'Terjadi Kesalahan', 5000);
@@ -118,8 +118,9 @@ const ChatsCard = ({
     }
 
     const { minimize, close } = cardTool
-    const { messages, allow_chat: allowChat } = dataMessage
+    const { allow_chat: allowChat } = dataMessage
 
+    console.log(currentUser);
     return (
         <div className="card direct-chat direct-chat-warning">
             <div className="card-header">
@@ -145,11 +146,15 @@ const ChatsCard = ({
                     )
                 }
             </div>
-            <div className="card-body">
-                {children}
-            </div>
             {
-                messages.length > 0 || (
+                adminData && (
+                    <div className="card-body">
+                        {children}
+                    </div>
+                )
+            }
+            {
+                (chatCheckValid) || (
                     <div className="overlay">
                         <i className="fas fa-2x fa-sync-alt fa-spin"></i>
                     </div>

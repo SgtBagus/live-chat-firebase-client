@@ -62,19 +62,21 @@ class Register extends Component {
 
     submitHandel = async () => {
         const { form: { file } } = this.state;
-
         const isFormValid = await this.form.validateForm();
 
-        if (!file) {
-            NotificationManager.error('Mohon Upload Foto Anda', 'Click me!', 5000);
-        }
-
         if (isFormValid) {
-            this.setState({
-                loading: true,
-            }, async () => {
-                await this.handleSubmit();
-            });
+            try {
+                if (!file) throw new Error('Mohon Upload Foto Anda');
+
+                this.setState({
+                    loading: true,
+                }, async () => {
+                    await this.handleSubmit();
+                });
+            } catch (err) {
+                const errorText = catchError(err);
+                this.handleExpectedError(errorText);
+            }
         }
     
         this.setState({
@@ -96,25 +98,16 @@ class Register extends Component {
             const date = new Date().getTime();
             const uploadImage = await uploadFile(file, `userProfile/${name.replaceAll(' ', '_') + date}`);
             if (!uploadImage) throw new Error('Foto Tidak Terupload');
-        
-            const updateProfileRes = await updateProfile(res.user, {
-                displayName: name,
-                photoURL: uploadImage,
-            });
-            if (!updateProfileRes) this.handleExpectedError('Gagal Mengganti Foto Anda');
             
-            const setUserRes = await setDoc(doc(db, "users", res.user.uid), {
+            await updateProfile(res.user, { displayName: name, photoURL: uploadImage });
+            await setDoc(doc(db, "users", res.user.uid), {
                 uid: res.user.uid,
                 displayName: name,
                 email,
                 photoURL: uploadImage,
                 is_admin: false,
             });
-            if (!setUserRes) throw new Error('Gagal Mendaftar');
-
-            // //create empty user chats on firestore
-            const setDocRes = await setDoc(doc(db, "userChats", res.user.uid), {});
-            if (!setDocRes) throw new Error('Gagal membuat Sistem Chat');
+            await setDoc(doc(db, "userChats", res.user.uid), {});
 
             window.location.href = "/";
         } catch (err) {
