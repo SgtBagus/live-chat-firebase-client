@@ -1,5 +1,6 @@
 import { useContext } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { NotificationContainer } from 'react-notifications';
 
 import { LayoutDefault } from "./Layout"; 
 
@@ -18,6 +19,8 @@ const RenderDefaultLayout = (page, pageName, currentUser) => {
   return (
     <LayoutDefault dataLogin={currentUser} pageName={pageName}>
       {page}
+
+      <NotificationContainer />
     </LayoutDefault>
   )
 }
@@ -36,11 +39,8 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={RenderDefaultLayout(<Home />, "Home", currentUser)} />
-        <Route
-          path="/chat"
-          index
-          element={
+        <Route index path="/" element={RenderDefaultLayout(<Home />, "Home", currentUser)} />
+        <Route path="/chat" element={
             <ProtectedRoute>
               {RenderDefaultLayout(<ChatPage dataLogin={currentUser} />, "Chat Kepada Admin", currentUser)}
             </ProtectedRoute>

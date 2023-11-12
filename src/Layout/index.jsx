@@ -1,6 +1,8 @@
 import React from 'react';
+
 import { HeaderComponents } from './components/Header';
 import { FooterComponents } from './components/Footer';
+import { EmailVerification } from './components/EmailVerification';
 
 export const LayoutDefault = ({ dataLogin, children, pageName }) => (
     <>
@@ -17,6 +19,11 @@ export const LayoutDefault = ({ dataLogin, children, pageName }) => (
                 </div>
                 <div className="content">
                     <div className="container">
+                        {
+                            dataLogin && (
+                                <EmailVerification dataLogin={dataLogin} />
+                            )
+                        }
                         {children}
                     </div>
                 </div>

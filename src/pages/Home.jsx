@@ -2,44 +2,11 @@ import React, { Component } from 'react';
 
 import Card from '../components/Card';
 import Accordion from '../components/Accordion';
-import Callouts from '../components/Callouts';
-
-import ButonComponents from '../components/Button';
 
 class Home extends Component {
   render() {
     return (
       <div className="row">
-        <div className="col-12">
-          <Callouts
-            iconAlert="fas fa-envelope"
-            title="Verifikasi Email !"
-            closeAlert={false}
-            type="warning"
-          >
-            <div
-              className="d-flex flex-column align-items-start"
-            >
-              <div>
-                <p className="mb-2">
-                  Untuk menggunakan fitur chat, silakan verifikasi email Anda.
-                </p>
-                <p>
-                  Jika email verifikasi tidak muncul, silakan klik tombol 
-                  <b> Kirim Ulang </b>
-                  di bawah ini.
-                </p>
-              </div>
-              
-              <ButonComponents
-                type="button"
-                buttonType="btn btn-primary"
-                buttonAction={() => { console.log('kirim disini') }}
-                buttonText="Kirim Ulang Email Verifikasi"
-              />
-            </div>
-          </Callouts>
-        </div>
         <div className="col-12">
           <Card
             title="FAQ - Frequently Asked Question"

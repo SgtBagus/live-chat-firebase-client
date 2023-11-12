@@ -24,6 +24,7 @@ class ForgotPassword extends Component {
             form: {
                 password: '',
             },
+            loading: false,
             isFormSubmitted: false,
         };
     }
@@ -48,23 +49,48 @@ class ForgotPassword extends Component {
             form: newForm,
         });
     };
+    
+    submitHandel = async () => {
+        const isFormValid = await this.form.validateForm();
 
-    passwordReset = () => {
+        if (isFormValid) {
+            this.setState({
+                loading: true,
+            }, async () => {
+                await this.passwordReset();
+            });
+        }
+    
+        this.setState({
+          isFormSubmitted: true,
+        });
+    }
+
+    passwordReset = async () => {
         const {
             form: { email }
         } = this.state;
 
-        sendPasswordResetEmail(auth, email).then(() => {
-            NotificationManager.success('Mohon cek Email Anda!', 'Email Sudah Terkirim', 5000);
-        })
-        .catch((error) => {
-            NotificationManager.error(catchError(error), 'Email Sudah Terkirim', 5000);
+        try {
+            await sendPasswordResetEmail(auth, email).then(() => {
+                NotificationManager.success('Mohon cek Email Anda!', 'Email Sudah Terkirim', 5000);
+            })
+            .catch((error) => {
+                throw new Error(error);
+            });
+        } catch (err) {
+            NotificationManager.error(catchError(err), 'Email Sudah Terkirim', 5000);
+        }
+        
+        this.setState({
+            isFormSubmitted: true,
+            loading: false,
         });
     }
 
     render() {
         const {
-            form: { email },
+            form: { email }, loading,
         } = this.state;
 
         return (
@@ -107,8 +133,10 @@ class ForgotPassword extends Component {
                                         <ButonComponents
                                             type="button"
                                             buttonType="btn btn-primary btn-block"
-                                            buttonAction={() => { this.passwordReset(); }}
-                                            buttonText="Kirim Email"
+                                            buttonAction={() => { this.submitHandel(); }}
+                                            buttonText={loading ? '' : 'Kirim Email'}
+                                            buttonIcon={loading && 'fas fa-sync-alt fa-spin'}
+                                            disabled={loading}
                                         />
                                     </div>
                                 </div>

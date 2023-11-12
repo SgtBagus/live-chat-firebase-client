@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { v4 as uuid } from "uuid";
-import { NotificationContainer, NotificationManager } from 'react-notifications';
+import { NotificationManager } from 'react-notifications';
 import {
   arrayUnion, doc, onSnapshot, serverTimestamp, Timestamp, updateDoc,
 } from "firebase/firestore";
@@ -247,8 +247,6 @@ const ChatsCard = ({
                     </div>
                 </div>
             </div>
-            
-            <NotificationContainer />
         </div>
     )
 }

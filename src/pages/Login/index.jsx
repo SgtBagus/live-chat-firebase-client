@@ -7,7 +7,6 @@ import { collection, query, where, getDocs } from "firebase/firestore";
 
 import { auth, db } from "../../firebase";
 
-
 import FormValidation from "../../components/FormValidation";
 import InputEmail from "../../components/form/InputEmail";
 import InputPassword from "../../components/form/InputPassword";
@@ -78,15 +77,15 @@ class Login extends Component {
             const data = await query(collection(db, "users"), where("email", "==", email));
             const userData = await getDocs(data);
             const findData = userData.docs.map(doc => doc.data())[0];
-            if (!findData) throw new Error('Email dan Password anda tidak terdaftar');
+            if (!findData) throw new Error('Email Belum Terdaftar');
 
             const { is_admin: isAdmin, email: loginEmail } = findData;
 
             if (!isAdmin) {
                 await signInWithEmailAndPassword(auth, loginEmail, password).then(() => {
                     window.location.href = "/";
-                }).catch(() => {
-                    throw new Error('Terjadi Kesalahan')
+                }).catch((err) => {
+                    throw new Error('Email dan Password Anda Salah')
                 });
             } else {
                 throw new Error('Tidak Memiliki Akses');
