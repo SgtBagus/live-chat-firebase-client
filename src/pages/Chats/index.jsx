@@ -114,8 +114,6 @@ class ChatPage extends Component {
     const { adminData, text, img } = this.state;
     const { dataLogin } = this.props;
 
-    console.log(dataLogin)
-
     return (
       <div className="row">
         <div className="col-md-12">
