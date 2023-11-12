@@ -67,13 +67,17 @@ const Message = ({ message }) => {
                   ? (
                     <img
                         src={message.img}
-                        className="m-2"
-                        style={{ width: '300px', objectFit: 'cover' }}
+                        className="my-2 w-100"
+                        style={{ objectFit: 'cover' }}
                         alt=""
                     />
                   )
                   : (
-                    <video className="m-2" width="300px" controls style={{ objectFit: 'cover' }}>
+                    <video
+                      className="my-2 w-100"
+                      controls
+                      style={{ objectFit: 'cover' }}
+                    >
                         <source src={message.img} type="video/mp4" />
                         Your browser does not support HTML video.
                     </video>

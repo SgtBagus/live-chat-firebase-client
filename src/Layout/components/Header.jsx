@@ -25,7 +25,7 @@ export const HeaderComponents = ({ dataLogin }) => {
                         {
                             dataLogin && (
                                 <li className="nav-item">
-                                    <a href="/chat" className="nav-link" target='_blank'>Chat</a>
+                                    <a href="/chat" className="nav-link">Chat</a>
                                 </li>
                             )
                         }

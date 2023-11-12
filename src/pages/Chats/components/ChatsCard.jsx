@@ -4,12 +4,12 @@ import { NotificationContainer, NotificationManager } from 'react-notifications'
 import {
   arrayUnion, doc, onSnapshot, serverTimestamp, Timestamp, updateDoc,
 } from "firebase/firestore";
-// import { sendEmailVerification } from "firebase/auth";
-
 
 import { db } from "../../../firebase";
 
+import Modals from "../../../components/Modals";
 import ButonComponents from '../../../components/Button';
+import InputText from "../../../components/form/InputText";
 
 import { ChatContext } from "../../../context/ChatContext";
 import { AuthContext } from "../../../context/AuthContext";
@@ -18,6 +18,8 @@ import { uploadFile } from "../../../data/uploadFile";
 
 import { checkThisFileIsImageOrNot } from "../../../Helper/checkFile";
 import { catchError } from "../../../Helper/helper";
+
+import defaultImage from '../defaultImage.png';
 
 const ChatsCard = ({
     cardTool, children, title, adminData,
@@ -32,7 +34,6 @@ const ChatsCard = ({
     const { data } = useContext(ChatContext);
   
     useEffect(() => {
-        // sendEmailVerification(currentUser);
         const unSub = onSnapshot(
             doc(db, "chats", data.chatId),
             (doc) => {
@@ -111,7 +112,7 @@ const ChatsCard = ({
     const checkImage = (e) => {
         const thisFileisImage = checkThisFileIsImageOrNot(e.target.files[0]);
         if (!thisFileisImage) {
-            NotificationManager.warning('Hanya Boleh Mengungah Gamabr', 'Terjadi Kesalahan', 5000);
+            NotificationManager.warning('Hanya Boleh Mengungah Gambar', 'Terjadi Kesalahan', 5000);
         } else {
             setFile(e.target.files[0]);
         }
@@ -120,7 +121,6 @@ const ChatsCard = ({
     const { minimize, close } = cardTool
     const { allow_chat: allowChat } = dataMessage
 
-    console.log(currentUser);
     return (
         <div className="card direct-chat direct-chat-warning">
             <div className="card-header">
@@ -162,89 +162,78 @@ const ChatsCard = ({
             }
             <div className="card-footer">
                 <div className='row'>
-                    <div className="col-md-6 my-2">
-                        {
-                            file && (
-                                <div
-                                    className="shadow"
-                                    style={{
-                                        borderRadius: '0.3rem',
-                                        backgroundColor: '#d2d6de',
-                                        border: '1px solid #d2d6de',
-                                        margin: '5px',
-                                        padding: '5px',
-                                        position: 'absolute',
-                                        bottom: '40px',
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        alignItems: 'center',
-                                    }}
-                                >
-                                    {
-                                        checkThisFileIsImageOrNot(file)
-                                        ? (
-                                            <img
-                                                src={URL.createObjectURL(file)}
-                                                className="m-2"
-                                                style={{ width: '400px', objectFit: 'cover' }}
-                                                alt=""
-                                            />
-                                        )
-                                        : ( 
-                                            <video className="m-2" width="400px" controls style={{ objectFit: 'cover' }}>
-                                                <source src={URL.createObjectURL(file)} type="video/mp4" />
-                                                Your browser does not support HTML video.
-                                            </video>
-                                        )
-                                    }
-                                    <ButonComponents
-                                        buttonType="btn-default m2"
-                                        buttonAction={() => setFile(null)}
-                                        buttonText="Hapus File"
-                                        buttonIcon="fa fa-trash"
-                                    />
-                                </div>
-                            )
-                        }
+                    <div className="col-md-6 col-xs-12 my-2">
                         {
                             allowChat && (
-                                <input
-                                    type="text"
+                                <InputText
                                     name="message"
                                     placeholder="Isi Pesan Anda..."
-                                    className="form-control mx-2"
-                                    onChange={(e) => setText(e.target.value)}
                                     value={text}
+                                    changeEvent={(val, e) => setText(val)}
+                                    disabled={onSend}
                                 />
                             )
                         }
                     </div>
-                    <div className="col-md-6 my-2">
+                    <div className="col-md-6 col-xs-12 my-2">
                         <div className='d-flex'>
                             <div className="d-flex align-items-center flex-column w-100 mx-2">
-                                <input
-                                    id="file"
-                                    type="file"
-                                    accept="image/png, image/gif, image/jpeg"
-                                    style={{ display: "none" }}
-                                    onChange={(e) => {
-                                        try {
-                                            checkImage(e);
-                                        } catch {
-                                            setFile(null);
+                                <Modals
+                                    buttonIcon="fas fa-file mx-2"
+                                    buttonLabel="Gambar"
+                                    className="w-100"
+                                    btnSubmitHandel={handleSend}
+                                    btnCancelHandel={() => setFile(null)}
+                                    btnSubmitText={onSend ? '' : 'Kirim'}
+                                    disabled={onSend}
+                                    buttonSubmitIcon={onSend ? "fas fa-sync-alt fa-spin" : 'fa fa-paper-plane mr-2'}
+                                    btnSubmitDisabled={onSend || (( text === '') && (file === null) )}
+                                >
+                                    <div className="row">
+                                        <div className="col-md-12 my-2">
+                                            <img
+                                                src={file ? URL.createObjectURL(file) : defaultImage}
+                                                className="rounded w-100"
+                                                style={{ objectFit: 'cover' }}
+                                                alt=""
+                                            />
+                                            <input
+                                                id="file"
+                                                type="file"
+                                                accept="image/png, image/gif, image/jpeg"
+                                                style={{ display: "none" }}
+                                                onChange={(e) => {
+                                                    try {
+                                                        checkImage(e);
+                                                    } catch {
+                                                        setFile(null);
+                                                    }
+                                                }}
+                                            />
+                                            <label htmlFor="file" className="mt-2 w-100" style={{ marginBottom: 'unset' }}>
+                                                <div
+                                                    className="btn btn-default w-100"
+                                                >
+                                                    <i className="fas fa-file mr-2" />
+                                                    {!file ? "Upload Gambar" : "Ganti Gambar"}
+                                                </div>
+                                            </label>
+                                        </div>
+                                        {
+                                            allowChat && (
+                                                <div className="col-md-12 my-2">
+                                                    <InputText
+                                                        name="message"
+                                                        placeholder="Isi Pesan Anda..."
+                                                        value={text}
+                                                        changeEvent={(val, e) => setText(val)}
+                                                        disabled={onSend}
+                                                    />
+                                                </div>
+                                            )
                                         }
-                                    }}
-                                />
-                                <label htmlFor="file" style={{ marginBottom: 'unset' }}>
-                                    <div
-                                        className="btn btn-default"
-                                        disabled={((file && text) || onSend)}
-                                        style={{ width: '200px' }}
-                                    >
-                                        <i className="fas fa-file mr-2" />
-                                        {!file ? "Upload Gambar" : "Ganti Gambar"}
                                     </div>
-                                </label>
+                                </Modals>
                             </div>
                             <ButonComponents
                                 type="button"
