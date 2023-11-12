@@ -20,8 +20,14 @@ export const LayoutDefault = ({ dataLogin, children, pageName }) => (
                 <div className="content">
                     <div className="container">
                         {
-                            dataLogin.emailVerified || (
-                                <EmailVerification dataLogin={dataLogin} />
+                            dataLogin && (
+                                <>
+                                    {
+                                        dataLogin.emailVerified || (
+                                            <EmailVerification dataLogin={dataLogin} />
+                                        )
+                                    }
+                                </>
                             )
                         }
                         {children}
