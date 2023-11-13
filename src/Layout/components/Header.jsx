@@ -10,6 +10,7 @@ const buttonActionLogin = () => {
 }
 
 export const HeaderComponents = ({ dataLogin }) => {
+    console.log(dataLogin);
     return (
         <div className="main-header navbar navbar-expand-md navbar-light navbar-white">
             <div className="container">
@@ -56,10 +57,10 @@ export const HeaderComponents = ({ dataLogin }) => {
                     }
                     <li className="nav-item mx-3">
                         <ButonComponents
-                            buttonType={dataLogin ? "btn-danger" : "btn-primary"}
-                            buttonAction={dataLogin ? ()=>signOut(auth) : buttonActionLogin}
-                            buttonText={dataLogin ? "Logout" : "Login"}
-                            buttonIcon={dataLogin ? "fas fa-sign-out-alt" : "fas fa-sign-in-alt"}
+                            buttonType={!dataLogin ? "btn-primary" : "btn-danger"}
+                            buttonAction={!dataLogin ? buttonActionLogin : ()=>signOut(auth)}
+                            buttonText={!dataLogin ? "Login" : "Logout"}
+                            buttonIcon={!dataLogin ? "fas fa-sign-in-alt" : "fas fa-sign-out-alt"}
                         />
                     </li>
                 </ul>
