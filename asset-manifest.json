@@ -1,17 +1,17 @@
 {
   "files": {
     "main.css": "/live-chat-firebase-client/static/css/main.c21f2931.css",
-    "main.js": "/live-chat-firebase-client/static/js/main.244da43f.js",
+    "main.js": "/live-chat-firebase-client/static/js/main.2102624a.js",
     "static/media/notification.svg?s3g3t9": "/live-chat-firebase-client/static/media/notification.5d0158671dd860c714c4.svg",
     "static/media/notification.eot": "/live-chat-firebase-client/static/media/notification.3657084dc0419605a91c.eot",
     "static/media/notification.woff?s3g3t9": "/live-chat-firebase-client/static/media/notification.c392cd33d9d9de730f9d.woff",
     "static/media/notification.ttf?s3g3t9": "/live-chat-firebase-client/static/media/notification.c5d9251ea82e42f75381.ttf",
     "index.html": "/live-chat-firebase-client/index.html",
     "main.c21f2931.css.map": "/live-chat-firebase-client/static/css/main.c21f2931.css.map",
-    "main.244da43f.js.map": "/live-chat-firebase-client/static/js/main.244da43f.js.map"
+    "main.2102624a.js.map": "/live-chat-firebase-client/static/js/main.2102624a.js.map"
   },
   "entrypoints": [
     "static/css/main.c21f2931.css",
-    "static/js/main.244da43f.js"
+    "static/js/main.2102624a.js"
   ]
 }
