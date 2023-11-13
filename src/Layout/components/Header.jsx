@@ -10,7 +10,6 @@ const buttonActionLogin = () => {
 }
 
 export const HeaderComponents = ({ dataLogin }) => {
-    console.log(dataLogin);
     return (
         <div className="main-header navbar navbar-expand-md navbar-light navbar-white">
             <div className="container">
