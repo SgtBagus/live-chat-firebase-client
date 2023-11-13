@@ -111,7 +111,7 @@ class Register extends Component {
             await setDoc(doc(db, "userChats", res.user.uid), {});
             await sendEmailVerificationEvent(res.user);
 
-            window.location.href = "/";
+            window.location.href = "#/";
         } catch (err) {
             this.setState({
                 loading: false,
@@ -139,7 +139,7 @@ class Register extends Component {
                 <div className="login-box">
                     <div
                         className="login-logo" 
-                        onClick={() => window.location.href = "/" }
+                        onClick={() => window.location.href = "#/" }
                         style={{ cursor: 'pointer' }}
                     >
                         <b>Admin</b>LTE
@@ -269,7 +269,7 @@ class Register extends Component {
 
                             <p
                                 className="m-2 text-center" 
-                                onClick={() => window.location.href = "/login" }
+                                onClick={() => window.location.href = "#/login" }
                                 style={{ cursor: 'pointer' }}
                             >
                                 Sudah Jadi Pengguna
