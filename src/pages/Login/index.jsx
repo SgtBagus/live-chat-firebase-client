@@ -83,7 +83,7 @@ class Login extends Component {
 
             if (!isAdmin) {
                 await signInWithEmailAndPassword(auth, loginEmail, password).then(() => {
-                    window.location.href = "/";
+                    window.location.href = "#/";
                 }).catch((err) => {
                     throw new Error('Email dan Password Anda Salah')
                 });
