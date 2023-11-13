@@ -1,17 +1,17 @@
 {
   "files": {
-    "main.css": "//live-chat-firebase-client/static/css/main.1fbe5139.css",
-    "main.js": "//live-chat-firebase-client/static/js/main.0a6176d1.js",
-    "static/media/notification.svg?s3g3t9": "//live-chat-firebase-client/static/media/notification.5d0158671dd860c714c4.svg",
-    "static/media/notification.eot": "//live-chat-firebase-client/static/media/notification.3657084dc0419605a91c.eot",
-    "static/media/notification.woff?s3g3t9": "//live-chat-firebase-client/static/media/notification.c392cd33d9d9de730f9d.woff",
-    "static/media/notification.ttf?s3g3t9": "//live-chat-firebase-client/static/media/notification.c5d9251ea82e42f75381.ttf",
-    "index.html": "//live-chat-firebase-client/index.html",
-    "main.1fbe5139.css.map": "//live-chat-firebase-client/static/css/main.1fbe5139.css.map",
-    "main.0a6176d1.js.map": "//live-chat-firebase-client/static/js/main.0a6176d1.js.map"
+    "main.css": "/live-chat-firebase-client/static/css/main.c21f2931.css",
+    "main.js": "/live-chat-firebase-client/static/js/main.34072584.js",
+    "static/media/notification.svg?s3g3t9": "/live-chat-firebase-client/static/media/notification.5d0158671dd860c714c4.svg",
+    "static/media/notification.eot": "/live-chat-firebase-client/static/media/notification.3657084dc0419605a91c.eot",
+    "static/media/notification.woff?s3g3t9": "/live-chat-firebase-client/static/media/notification.c392cd33d9d9de730f9d.woff",
+    "static/media/notification.ttf?s3g3t9": "/live-chat-firebase-client/static/media/notification.c5d9251ea82e42f75381.ttf",
+    "index.html": "/live-chat-firebase-client/index.html",
+    "main.c21f2931.css.map": "/live-chat-firebase-client/static/css/main.c21f2931.css.map",
+    "main.34072584.js.map": "/live-chat-firebase-client/static/js/main.34072584.js.map"
   },
   "entrypoints": [
-    "static/css/main.1fbe5139.css",
-    "static/js/main.0a6176d1.js"
+    "static/css/main.c21f2931.css",
+    "static/js/main.34072584.js"
   ]
 }
