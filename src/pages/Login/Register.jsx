@@ -8,6 +8,7 @@ import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from "../../firebase";
 
 import { uploadFile } from "../../data/uploadFile";
+import { sendEmailVerificationEvent } from '../../data/sendEmailVerification';
 
 import FormValidation from "../../components/FormValidation";
 import InputText from "../../components/form/InputText";
@@ -108,6 +109,7 @@ class Register extends Component {
                 is_admin: false,
             });
             await setDoc(doc(db, "userChats", res.user.uid), {});
+            await sendEmailVerificationEvent(res.user);
 
             window.location.href = "/";
         } catch (err) {
