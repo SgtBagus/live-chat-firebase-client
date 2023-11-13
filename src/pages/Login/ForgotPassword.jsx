@@ -98,7 +98,7 @@ class ForgotPassword extends Component {
                 <div className="login-box">
                     <div
                         className="login-logo" 
-                        onClick={() => window.location.href = "/" }
+                        onClick={() => window.location.href = "#/" }
                         style={{ cursor: 'pointer' }}
                     >
                         <b>Admin</b>LTE
@@ -144,14 +144,14 @@ class ForgotPassword extends Component {
 
                             <p
                                 className="m-2 text-center" 
-                                onClick={() => window.location.href = "/Login" }
+                                onClick={() => window.location.href = "#/Login" }
                                 style={{ cursor: 'pointer' }}
                             >
                                 Kembali Login
                             </p>   
                             <p
                                 className="m-2 text-center" 
-                                onClick={() => window.location.href = "/register" }
+                                onClick={() => window.location.href = "#/register" }
                                 style={{ cursor: 'pointer' }}
                             >
                                 Daftar Menjadi Pengguna

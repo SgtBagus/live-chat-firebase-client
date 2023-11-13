@@ -6,7 +6,7 @@ import ButonComponents from '../../components/Button';
 import { auth } from '../../firebase';
 
 const buttonActionLogin = () => {
-    window.location.href = "/login";
+    window.location.href = "#/login";
 }
 
 export const HeaderComponents = ({ dataLogin }) => {
@@ -20,12 +20,12 @@ export const HeaderComponents = ({ dataLogin }) => {
                 <div className="collapse navbar-collapse order-3" id="navbarCollapse">
                     <ul className="navbar-nav">
                         <li className="nav-item">
-                            <a href="/" className="nav-link">Home</a>
+                            <a href="#/" className="nav-link">Home</a>
                         </li>
                         {
                             dataLogin && (
                                 <li className="nav-item">
-                                    <a href="/chat" className="nav-link">Chat</a>
+                                    <a href="#/chat" className="nav-link">Chat</a>
                                 </li>
                             )
                         }
