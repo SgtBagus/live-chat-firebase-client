@@ -38,7 +38,7 @@ function App() {
 
   return (
     <Routes>
-      <Route index path="/" element={RenderDefaultLayout(<Home />, "Home", currentUser)} />
+      <Route index path="" element={RenderDefaultLayout(<Home />, "Home", currentUser)} />
       <Route path="/chat" element={
           <ProtectedRoute>
             {RenderDefaultLayout(<ChatPage dataLogin={currentUser} />, "Chat Kepada Admin", currentUser)}
