@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { NotificationContainer } from 'react-notifications';
 
 import { LayoutDefault } from "./Layout"; 
@@ -37,20 +37,18 @@ function App() {
   };
 
   return (
-    <HashRouter>
-      <Routes>
-        <Route index path="/" element={RenderDefaultLayout(<Home />, "Home", currentUser)} />
-        <Route path="/chat" element={
-            <ProtectedRoute>
-              {RenderDefaultLayout(<ChatPage dataLogin={currentUser} />, "Chat Kepada Admin", currentUser)}
-            </ProtectedRoute>
-          }
-        />
-        <Route path="login" element={<Login />} />
-        <Route path="lupa-password" element={<ForgotPassword />} />
-        <Route path="register" element={<Register />} />
-      </Routes>
-    </HashRouter>
+    <Routes>
+      <Route index path="/" element={RenderDefaultLayout(<Home />, "Home", currentUser)} />
+      <Route path="/chat" element={
+          <ProtectedRoute>
+            {RenderDefaultLayout(<ChatPage dataLogin={currentUser} />, "Chat Kepada Admin", currentUser)}
+          </ProtectedRoute>
+        }
+      />
+      <Route path="login" element={<Login />} />
+      <Route path="lupa-password" element={<ForgotPassword />} />
+      <Route path="register" element={<Register />} />
+    </Routes>
   );
 }
 
